@@ -29,6 +29,12 @@
         <activity
             android:name=".Game3Activity"
             android:exported="false" />
+        <activity
+            android:name=".Game1RulesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PlayGame1Activity"
+            android:exported="false" />
     </application>
 
 </manifest>

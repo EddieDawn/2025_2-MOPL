@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Term Project</string>
+    <string name="number_baseball_rules">
+<b>Objective:</b>\n
+Guess the secret 4-digit number chosen by the computer.\n\n
+
+<b>Game Rules:</b>\n
+• The computer randomly selects a 4-digit number with unique digits (no repeating digits).\n
+• You have to guess the correct number.\n\n
+
+<b>Feedback System:</b>\n
+After each guess, you will receive feedback:\n\n
+
+<b>Strike:</b> A digit is correct and in the correct position.\n
+<b>Ball:</b> A digit is correct but in the wrong position.\n
+<b>Out:</b> None of the digits are correct.\n\n
+
+<b>Examples:</b>\n
+If the secret number is <b>1234</b>:\n
+• Guess <b>1235</b> → 3 Strikes, 0 Balls (1, 2, 3 are correct)\n
+• Guess <b>4321</b> → 0 Strikes, 4 Balls (all digits exist but wrong positions)\n
+• Guess <b>5678</b> → 0 Strikes, 0 Balls (Out)\n
+• Guess <b>1324</b> → 2 Strikes, 2 Balls (1, 2 correct position, 3, 4 wrong position)\n\n
+
+<b>Winning:</b>\n
+Get 4 Strikes to win the game!\n\n
+
+<b>Good luck!</b>
+    </string>
 </resources>
