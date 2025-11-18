@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 class Game1RulesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_rules)
+        setContentView(R.layout.activity_game1_rules)
 
         // Back button click listener
         findViewById<Button>(R.id.btnBack).setOnClickListener {
