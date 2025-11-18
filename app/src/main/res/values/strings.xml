@@ -27,4 +27,36 @@ Get 4 Strikes to win the game!\n\n
 
 <b>Good luck!</b>
     </string>
+    <string name="quick_draw_rules">
+<b>Objective:</b>\n
+A 2-player reaction speed game. Be the first to draw when the signal appears!\n\n
+
+<b>Setup:</b>\n
+• This game requires 2 players sharing one phone.\n
+• One player holds the phone from the top, the other from the bottom.\n
+• Each player has their own DRAW button on their side.\n
+• The top button is rotated 180° for the top player\'s convenience.\n\n
+
+<b>How to Play:</b>\n
+1. Press Play to start the game.\n
+2. A 5-second <b>Ready</b> countdown will appear.\n
+3. The game screen appears with a <b>RED</b> background.\n
+4. After a random time (up to 15 seconds), the screen turns <b>BLUE</b> and shows <b>DRAW!</b> in the center.\n
+5. When you see BLUE, quickly press your DRAW button!\n\n
+
+<b>Winning:</b>\n
+• Press your button <b>AFTER</b> the screen turns blue → You WIN!\n
+• The faster player wins.\n\n
+
+<b>Losing:</b>\n
+• Press your button <b>BEFORE</b> the screen turns blue → You LOSE!\n
+• This is called a \"false start.\"\n\n
+
+<b>Tips:</b>\n
+• Stay focused and watch for the color change.\n
+• Don\'t press too early!\n
+• React as fast as you can when you see blue.\n\n
+
+<b>Good luck, and may the fastest draw win!</b>
+    </string>
 </resources>
