@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Go Stop (mobile app programming lab)</string>
+
+    <string name ="selected_card">Selected card</string>string>
+</resources>
