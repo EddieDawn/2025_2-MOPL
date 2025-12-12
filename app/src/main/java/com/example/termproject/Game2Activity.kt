@@ -24,6 +24,11 @@ class Game2Activity : AppCompatActivity() {
             val intent = Intent(this, Game2RulesActivity::class.java)
             startActivity(intent)
         }
+
+        // Back button click listener
+        findViewById<Button>(R.id.btnBack).setOnClickListener {
+            finish()
+        }
     }
 
     // Handle back button click
