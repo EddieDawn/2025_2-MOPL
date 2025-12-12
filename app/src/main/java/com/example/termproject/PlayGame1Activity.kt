@@ -99,6 +99,16 @@ class PlayGame1Activity : AppCompatActivity() {
 
         val guess = digit1 + digit2 + digit3 + digit4
 
+        // Check if any digit is out of range for the current difficulty
+        if (maxDigit < 9) {
+            for (char in guess) {
+                if (char.toString().toInt() > maxDigit) {
+                    Toast.makeText(this, "some number is out of range.", Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+        }
+
         // Check for duplicate digits
         if (guess.toSet().size != 4) {
             Toast.makeText(this, "All digits must be unique!", Toast.LENGTH_SHORT).show()
