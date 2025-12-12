@@ -25,10 +25,13 @@ class PlayGame1Activity : AppCompatActivity() {
 
     private var secretNumber = ""
     private var attemptCount = 0
+    private var maxDigit = 9
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play_game1)
+
+        maxDigit = intent.getIntExtra("MAX_DIGIT", 9)
 
         // Enable back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -56,7 +59,7 @@ class PlayGame1Activity : AppCompatActivity() {
 
     // Generate a random 4-digit number with unique digits
     private fun generateSecretNumber(): String {
-        val digits = (0..9).toMutableList()
+        val digits = (0..maxDigit).toMutableList()
         digits.shuffle(Random)
         return digits.take(4).joinToString("")
     }
@@ -95,6 +98,16 @@ class PlayGame1Activity : AppCompatActivity() {
         }
 
         val guess = digit1 + digit2 + digit3 + digit4
+
+        // Check if any digit is out of range for the current difficulty
+        if (maxDigit < 9) {
+            for (char in guess) {
+                if (char.toString().toInt() > maxDigit) {
+                    Toast.makeText(this, "some number is out of range.", Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+        }
 
         // Check for duplicate digits
         if (guess.toSet().size != 4) {
