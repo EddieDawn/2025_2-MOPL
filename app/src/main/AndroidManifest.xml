@@ -41,6 +41,9 @@
         <activity
             android:name=".PlayGame2Activity"
             android:exported="false" />
+        <activity
+            android:name=".Game1DifficultySelectActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
