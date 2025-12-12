@@ -1,19 +1,23 @@
 package com.example.gostopmobileappprogramminglab
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
-import android.os.Handler
-import android.os.Looper
+import coil.load
 
 import com.example.gostopmobileappprogramminglab.ai.SimpleOpponent
+import com.example.gostopmobileappprogramminglab.api.RetrofitClient
 import com.example.gostopmobileappprogramminglab.logic.GameEngine
 import com.example.gostopmobileappprogramminglab.model.GameState
 import com.example.gostopmobileappprogramminglab.model.Player
+import kotlinx.coroutines.launch
+
 
 class GoStopActivity : AppCompatActivity() {
 
@@ -22,60 +26,97 @@ class GoStopActivity : AppCompatActivity() {
     private lateinit var fieldRecycler: RecyclerView
     private lateinit var turnIndicator: TextView
     private lateinit var captureCount: TextView
+    private lateinit var opponentName: TextView
+    private lateinit var opponentImage: ImageView
+
     private lateinit var state: GameState
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_go_stop)
 
-        // Links layout elements
+        //Link layout views
         selectedCardImage = findViewById(R.id.cardImage)
         cardRecycler = findViewById(R.id.cardRecycler)
         fieldRecycler = findViewById(R.id.fieldRecycler)
         turnIndicator = findViewById(R.id.turnIndicator)
         captureCount = findViewById(R.id.captureCount)
+        opponentName = findViewById(R.id.opponentName)
+        opponentImage = findViewById(R.id.opponentImage)
 
-        // Initialise the game state
+        //Initialize game
         state = GameEngine.startNewGame()
 
-        // RecyclerView setup
-        cardRecycler.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        fieldRecycler.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        //RecyclerViews
+        cardRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        fieldRecycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        // Show the first card
+        // Show first card
         if (state.playerHand.isNotEmpty()) {
             selectedCardImage.setImageResource(state.playerHand[0].drawableRes)
         }
 
         // Initial field
-        fieldRecycler.adapter =
-            CardAdapter(state.field.map { it.drawableRes }) { }
+        fieldRecycler.adapter = CardAdapter(state.field.map { it.drawableRes }) {}
 
+        //Load random opponent via API
+        loadRandomOpponent()
+
+        // Final UI update
         refreshUI()
     }
 
+
+
+    // API: Load opponent with RandomUser API
+
+    private fun loadRandomOpponent() {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.randomUserApi.getRandomUser()
+                val user = response.results[0]
+
+                val fullName = "${user.name.first} ${user.name.last}"
+                val country = user.location.country
+                val age = user.dob.age
+
+                opponentName.text = "Opponent: $fullName ($country, $age)"
+                opponentImage.load(user.picture.large)
+
+            } catch (e: Exception) {
+                opponentName.text = "Opponent: Failed to load"
+            }
+        }
+    }
+
+
+
+
+    // Main UI refresh & game loop
+
     private fun refreshUI() {
-        // Update player's hand
+
+        // Player hand adapter
         cardRecycler.adapter = CardAdapter(state.playerHand.map { it.drawableRes }) { clickedResId ->
+
             val playedCard = state.playerHand.find { it.drawableRes == clickedResId }
 
             if (playedCard != null && state.currentTurn == Player.HUMAN) {
 
-                // Play card
+                // Player plays card
                 GameEngine.playCard(state, playedCard)
                 state.playerHand.remove(playedCard)
                 selectedCardImage.setImageResource(clickedResId)
 
-                // Update field
-                fieldRecycler.adapter =
-                    CardAdapter(state.field.map { it.drawableRes }) { }
+                // Update field view
+                fieldRecycler.adapter = CardAdapter(state.field.map { it.drawableRes }) { }
 
-                // CPU Turn
+                // Switch to CPU
                 GameEngine.switchTurn(state)
                 turnIndicator.text = "CPU’s Turn"
 
+                // CPU takes turn with slight delay
                 Handler(Looper.getMainLooper()).postDelayed({
 
                     val aiCard = SimpleOpponent.chooseMove(state)
@@ -83,11 +124,10 @@ class GoStopActivity : AppCompatActivity() {
                         GameEngine.playCard(state, aiCard)
                         state.opponentHand.remove(aiCard)
 
-                        fieldRecycler.adapter =
-                            CardAdapter(state.field.map { it.drawableRes }) { }
+                        fieldRecycler.adapter = CardAdapter(state.field.map { it.drawableRes }) {}
                     }
 
-                    // Switch back to player
+                    // Back to player
                     GameEngine.switchTurn(state)
                     turnIndicator.text = "Your Turn"
 
@@ -97,54 +137,31 @@ class GoStopActivity : AppCompatActivity() {
             }
         }
 
-        // Keep the top image synced with hand
+        // Sync selected card
         if (state.playerHand.isNotEmpty()) {
             selectedCardImage.setImageResource(state.playerHand[0].drawableRes)
         }
 
-        // Update capture count
+        // Capture count UI
         captureCount.text =
             "Captured: ${state.playerCaptured.size} / ${state.cpuCaptured.size}"
 
-        // Offer Go or Stop if player has 3+ points
-        val currentPlayerScore = GameEngine.calculateScore(state.playerCaptured)
-        if (currentPlayerScore >= 3 && state.currentTurn == Player.HUMAN) {
-            showGoStopDialog(currentPlayerScore)
+        // Offer to Go or Stop
+        val playerScore = GameEngine.calculateScore(state.playerCaptured)
+        if (playerScore >= 3 && state.currentTurn == Player.HUMAN) {
+            showGoStopDialog(playerScore)
         }
 
-        // Round End check
+        // End of round
         if (GameEngine.isRoundOver(state)) {
-            val finalPlayerScore = GameEngine.calculateScore(state.playerCaptured)
-            val finalCpuScore = GameEngine.calculateScore(state.cpuCaptured)
-
-            showRoundEndDialog(finalPlayerScore, finalCpuScore)
-            return
+            val pScore = GameEngine.calculateScore(state.playerCaptured)
+            val cScore = GameEngine.calculateScore(state.cpuCaptured)
+            showRoundEndDialog(pScore, cScore)
         }
     }
 
-   //Round end dialog
-    private fun showRoundEndDialog(playerScore: Int, cpuScore: Int) {
-        val message = when {
-            playerScore > cpuScore -> "You win!\nScore: $playerScore vs $cpuScore"
-            cpuScore > playerScore -> "CPU wins!\nScore: $playerScore vs $cpuScore"
-            else -> "It's a tie!\nScore: $playerScore vs $cpuScore"
-        }
 
-        val dialog = android.app.AlertDialog.Builder(this)
-            .setTitle("Round Over")
-            .setMessage(message)
-            .setPositiveButton("Play Again") { _, _ ->
-                state = GameEngine.startNewGame()
-                refreshUI()
-            }
-            .setNegativeButton("Quit", null)
-            .create()
-
-        dialog.show()
-    }
-
-
-    // Go stop dialog
+    // Go Stop Dialog
 
     private fun showGoStopDialog(playerScore: Int) {
         val dialog = android.app.AlertDialog.Builder(this)
@@ -163,7 +180,55 @@ class GoStopActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
+
+
+
+    // Round-End Dialog & Quotable API
+
+    private fun showRoundEndDialog(playerScore: Int, cpuScore: Int) {
+
+        lifecycleScope.launch {
+
+            // Try fetching a quote
+            val quoteText = try {
+                val quoteResponse = RetrofitClient.quoteApi.getRandomQuote()
+                quoteResponse.content
+            } catch (e: Exception) {
+                e.printStackTrace()
+                "(Quote unavailable)"
+            }
+
+
+            val resultText = when {
+                playerScore > cpuScore -> "You win!"
+                cpuScore > playerScore -> "CPU wins!"
+                else -> "It's a tie!"
+            }
+
+            val message = """
+                $resultText
+                Score: $playerScore vs $cpuScore
+
+                Quote:
+                "$quoteText"
+            """.trimIndent()
+
+            val dialog = android.app.AlertDialog.Builder(this@GoStopActivity)
+                .setTitle("Round Over")
+                .setMessage(message)
+                .setPositiveButton("Play Again") { _, _ ->
+                    state = GameEngine.startNewGame()
+                    refreshUI()
+                }
+                .setNegativeButton("Quit", null)
+                .create()
+
+            dialog.show()
+        }
+    }
 }
+
 
 
 
