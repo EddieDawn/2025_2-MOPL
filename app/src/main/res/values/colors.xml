@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Game Colors -->
+    <color name="game_background_waiting">#FFB3BA</color> <!-- Pastel Red -->
+    <color name="game_background_fake">#A5D6A7</color>  <!-- Pastel Green -->
+    <color name="game_background_real">#90CAF9</color>   <!-- Pastel Blue -->
 </resources>
