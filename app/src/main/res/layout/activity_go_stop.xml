@@ -2,73 +2,94 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:orientation="vertical"
+    android:gravity="center_horizontal"
     android:padding="12dp"
-    android:gravity="center_horizontal">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!-- Turn indicator -->
+    <!-- TURN INDICATOR -->
     <TextView
         android:id="@+id/turnIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your Turn"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_marginBottom="8dp"/>
 
+    <!-- CAPTURE COUNT -->
     <TextView
         android:id="@+id/captureCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Captured: 0 / 0"
         android:textSize="16sp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="10dp"/>
 
-
-    <!-- Big image area showing selected/played card -->
+    <!-- SELECTED CARD PREVIEW -->
     <ImageView
         android:id="@+id/cardImage"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:adjustViewBounds="true"
+        android:layout_width="190dp"
+        android:layout_height="190dp"
         android:scaleType="centerCrop"
-        android:contentDescription="@string/selected_card"
-        android:layout_marginBottom="16dp" />
+        android:adjustViewBounds="true"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/selected_card" />
 
+    <!-- OPPONENT NAME -->
     <TextView
         android:id="@+id/opponentName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Opponent: (loading...)"
+        android:textStyle="bold"
         android:textSize="18sp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="6dp"/>
 
+    <!-- OPPONENT IMAGE -->
     <ImageView
         android:id="@+id/opponentImage"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop" />
+
+    <!-- CPU THINKING TEXT -->
+    <TextView
+        android:id="@+id/cpuThinkingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CPU is thinking..."
+        android:textSize="16sp"
+        android:textColor="@android:color/holo_red_light"
         android:layout_marginTop="10dp"
-        android:scaleType="centerCrop"/>
+        android:visibility="gone" />
 
+    <!-- CPU SPINNER -->
+    <ProgressBar
+        android:id="@+id/cpuSpinner"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:visibility="gone" />
 
-    <!-- //Field RecyclerView (cards on the table) -->
+    <!-- FIELD RECYCLER -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fieldRecycler"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:padding="8dp"
-        android:layout_marginBottom="20dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="10dp" />
 
-    <!-- Player hand RecyclerView (bottom row) -->
+    <!-- HAND RECYCLER -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/cardRecycler"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="130dp"
         android:padding="8dp"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:orientation="horizontal" />
 
 </LinearLayout>

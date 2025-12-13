@@ -1,142 +1,212 @@
 package com.example.gostopmobileappprogramminglab.logic
 
-import com.example.gostopmobileappprogramminglab.R
-import com.example.gostopmobileappprogramminglab.model.CardType
-import com.example.gostopmobileappprogramminglab.model.GameState
-import com.example.gostopmobileappprogramminglab.model.GoStopCard
-import com.example.gostopmobileappprogramminglab.model.Player
+import com.example.gostopmobileappprogramminglab.model.*
 
 object GameEngine {
 
-    fun createDeck(): MutableList<GoStopCard> {
-        val deck = mutableListOf<GoStopCard>()
+    // Create a new shuffled deck and deal hands + field.
+    fun startNewGame(): GameState {
+        val deck = CardFactory.createDeck()
 
-        // Defined cards for each month
-        val months = mapOf(
-            1 to listOf(R.drawable.january_bright, R.drawable.january_ribbon,
-                R.drawable.january_junk_1, R.drawable.january_junk_2),
-            2 to listOf(R.drawable.february_ribbon, R.drawable.february_animal,
-                R.drawable.february_junk_1, R.drawable.february_junk_2),
-            3 to listOf(R.drawable.march_bright, R.drawable.march_ribbon,
-                R.drawable.march_junk_1, R.drawable.march_junk_2),
-            4 to listOf(R.drawable.april_ribbon, R.drawable.april_animal,
-                R.drawable.april_junk_1, R.drawable.april_junk_2),
-            5 to listOf(R.drawable.may_ribbon, R.drawable.may_animal,
-                R.drawable.may_junk_1, R.drawable.may_junk_2),
-            6 to listOf(R.drawable.june_ribbon, R.drawable.june_animal,
-                R.drawable.june_junk_1, R.drawable.june_junk_2),
-            7 to listOf(R.drawable.july_ribbon, R.drawable.july_animal,
-                R.drawable.july_junk_1, R.drawable.july_junk_2),
-            8 to listOf(R.drawable.august_bright, R.drawable.august_animal,
-                R.drawable.august_junk_1, R.drawable.august_junk_2),
-            9 to listOf(R.drawable.september_ribbon, R.drawable.september_animal,
-                R.drawable.september_junk_1, R.drawable.september_junk_2),
-            10 to listOf(R.drawable.october_ribbon, R.drawable.october_animal,
-                R.drawable.october_junk_1, R.drawable.october_junk_2),
-            11 to listOf(R.drawable.november_bright,
-                R.drawable.november_junk_1, R.drawable.november_junk_2),
-            12 to listOf(R.drawable.december_bright, R.drawable.december_ribbon, R.drawable.december_animal,
-                R.drawable.december_junk_1)
+        val playerHand = MutableList(10) { deck.removeAt(0) }
+        val opponentHand = MutableList(10) { deck.removeAt(0) }
+        val field = MutableList(8) { deck.removeAt(0) }
+
+        return GameState(
+            playerHand = playerHand,
+            opponentHand = opponentHand,
+            field = field,
+            deck = deck,
+            currentTurn = Player.HUMAN
         )
+    }
 
-        var idCounter = 1
-        for ((month, resList) in months) {
-            for (resId in resList) {
-                val type = when {
-                    resId.toString().contains("bright") -> CardType.BRIGHT
-                    resId.toString().contains("ribbon") -> CardType.RIBBON
-                    resId.toString().contains("animal") -> CardType.ANIMAL
-                    else -> CardType.JUNK
-                }
-                deck.add(GoStopCard(idCounter++, resId, month, type))
+    // Player or CPU plays a card onto the field.
+    fun playCard(state: GameState, played: GoStopCard) {
+
+        // find matches on the field with same month
+        val matches = state.field.filter { it.month == played.month }
+
+        when (matches.size) {
+
+            0 -> {
+                // No match? card goes to field
+                state.field.add(played)
+            }
+
+            1 -> {
+                // Simple capture
+                state.field.remove(matches[0])
+                capture(state, played, matches[0])
+            }
+
+            2 -> {
+                // Three-card situation then auto pick first for simplicity
+                state.field.remove(matches[0])
+                capture(state, played, matches[0])
+            }
+
+            3 -> {
+                // Bomb rule to capture all 3
+                matches.forEach { state.field.remove(it) }
+                matches.forEach { capture(state, played, it) }
+                state.goCount += 1
             }
         }
 
-        deck.shuffle()
-        return deck
+        // Now flip top of deck and resolve
+        if (state.deck.isNotEmpty()) {
+            flipFromDeck(state)
+        }
     }
 
-    fun startNewGame(): GameState {
-        val deck = createDeck()
-        val playerHand = mutableListOf<GoStopCard>()
-        val opponentHand = mutableListOf<GoStopCard>()
-        val field = mutableListOf<GoStopCard>()
+    // Flip the deck's top card and apply matching logic.
+    private fun flipFromDeck(state: GameState) {
 
-        // Standard Go-Stop: 7 cards per player, 6 on the field
-        repeat(7) { if (deck.isNotEmpty()) playerHand.add(deck.removeAt(0)
-        ) }
-        repeat(7) { if (deck.isNotEmpty()) opponentHand.add(deck.removeAt(0)
-        ) }
-        repeat(6) { if (deck.isNotEmpty()) field.add(deck.removeAt(0)
-        ) }
+        if (state.deck.isEmpty()) return
+        val flip = state.deck.removeAt(0)
 
-        return GameState(playerHand, opponentHand, field, deck, Player.HUMAN)
+        val matches = state.field.filter { it.month == flip.month }
+
+        when (matches.size) {
+
+            0 -> state.field.add(flip)
+
+            1 -> {
+                state.field.remove(matches[0])
+                capture(state, flip, matches[0])
+            }
+
+            2 -> {
+                state.field.remove(matches[0])
+                capture(state, flip, matches[0])
+            }
+
+            3 -> {
+                // Bomb on flip
+                matches.forEach { state.field.remove(it) }
+                matches.forEach { capture(state, flip, it) }
+                state.goCount += 1
+            }
+        }
     }
 
+    // Put captured cards into the correct captured pile.
+    private fun capture(state: GameState, a: GoStopCard, b: GoStopCard) {
+        if (state.currentTurn == Player.HUMAN) {
+            state.playerCaptured.add(a)
+            state.playerCaptured.add(b)
+        } else {
+            state.cpuCaptured.add(a)
+            state.cpuCaptured.add(b)
+        }
+    }
+
+    /**
+     * 1. Capture if possible.
+     * 2. Avoid helping player by discarding "dangerous" months.
+     * 3. Attempt bomb setup.
+     * 4. Otherwise discard the weakest card.
+     */
+    fun cpuPlay(state: GameState) {
+
+        val cpu = state.opponentHand
+        val field = state.field
+
+        // 1.capture if possible
+        val captureMove = cpu.firstOrNull { handCard ->
+            field.any { it.month == handCard.month }
+        }
+        if (captureMove != null) {
+            cpu.remove(captureMove)
+            playCard(state, captureMove)
+            switchTurn(state)
+            return
+        }
+
+        // 2. Avoid helping player: detect the months player has 2+ of
+        val dangerousMonths = state.playerHand.groupBy { it.month }
+            .filter { it.value.size >= 2 }
+            .keys
+
+        val safeMoves = cpu.filter { it.month !in dangerousMonths }
+        if (safeMoves.isNotEmpty()) {
+            val chosen = safeMoves.random()
+            cpu.remove(chosen)
+            playCard(state, chosen)
+            switchTurn(state)
+            return
+        }
+
+        // 3. Try to set up bomb (if field has exactly 2 duplicates of a month)
+        val setupMove = cpu.firstOrNull { handCard ->
+            field.count { it.month == handCard.month } == 2
+        }
+        if (setupMove != null) {
+            cpu.remove(setupMove)
+            playCard(state, setupMove)
+            switchTurn(state)
+            return
+        }
+
+        // 4. Fallback so it will play lowest-value card first
+        val chosen = cpu.minByOrNull {
+            when (it.type) {
+                CardType.BRIGHT -> 5
+                CardType.ANIMAL -> 3
+                CardType.RIBBON -> 2
+                CardType.JUNK -> 1
+            }
+        } ?: cpu.first()
+
+        cpu.remove(chosen)
+        playCard(state, chosen)
+        switchTurn(state)
+    }
+
+    //Switch turns //
     fun switchTurn(state: GameState) {
         state.currentTurn = if (state.currentTurn == Player.HUMAN) Player.CPU else Player.HUMAN
     }
-    fun playCard(state: GameState, card: GoStopCard) {
-        val match = state.field.firstOrNull { it.month == card.month }
 
-        if (match != null) {
-            // Capture both cards
-            state.field.remove(match)
-            when (state.currentTurn) {
-                Player.HUMAN -> state.playerCaptured.addAll(listOf(card, match))
-                Player.CPU -> state.cpuCaptured.addAll(listOf(card, match))
-            }
-        } else {
-            // No match? just place it on the field
-            state.field.add(card)
-        }
-    }
+    // Round ends when deck or hands are empty. //
     fun isRoundOver(state: GameState): Boolean {
-        return state.playerHand.isEmpty() &&
-                state.opponentHand.isEmpty() &&
-                state.deck.isEmpty()
+        return state.deck.isEmpty() ||
+                state.playerHand.isEmpty() ||
+                state.opponentHand.isEmpty()
     }
 
-// The Go stop Scoring below is simplified
+     //Bright / Ribbon / Animal / Junk scoring.//
 
-    fun calculateScore(captured: List<GoStopCard>): Int {
-        var score = 0
-        var junkCount = 0
-        var brightCount = 0
-        var ribbonCount = 0
-        var animalCount = 0
+    fun calculateFinalScore(state: GameState): Pair<Int, Int> {
 
-        for (card in captured) {
-            when (card.type) {
-                CardType.BRIGHT -> brightCount++
-                CardType.RIBBON -> ribbonCount++
-                CardType.ANIMAL -> animalCount++
-                CardType.JUNK -> junkCount++
-            }
+        fun scorePile(list: List<GoStopCard>): Int {
+
+            val brights = list.count { it.type == CardType.BRIGHT }
+            val animals = list.count { it.type == CardType.ANIMAL }
+            val ribbons = list.count { it.type == CardType.RIBBON }
+            val junk = list.count { it.type == CardType.JUNK }
+
+            var score = 0
+
+            // Brights (simple)
+            if (brights >= 3) score += (brights - 2) * 3
+
+            // Animals
+            if (animals >= 5) score += (animals - 4)
+
+            // Ribbons
+            if (ribbons >= 5) score += (ribbons - 4)
+
+            // Junk
+            if (junk >= 10) score += (junk - 9) / 2
+
+            return score
         }
 
-        // Bright scoring(simplified)
-        // 3 brights = +3, 4 brights = +4, 5 brights = +15
-        score += when (brightCount) {
-            3 -> 3
-            4 -> 4
-            5 -> 15
-            else -> 0
-        }
+        val pScore = scorePile(state.playerCaptured)
+        val cScore = scorePile(state.cpuCaptured)
 
-        // Ribbon scoring
-        // every 5 ribbons = +1
-        score += ribbonCount / 5
-
-        // Animal scoring
-        // every 5 animals = +1
-        score += animalCount / 5
-
-        // Junk scoring
-        // every 2 junk = +1 point
-        score += junkCount / 2
-
-        return score
+        return pScore to cScore
     }
-
 }

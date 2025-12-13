@@ -8,11 +8,12 @@ data class GameState(
     var currentTurn: Player,
     val playerCaptured: MutableList<GoStopCard> = mutableListOf(),
     val cpuCaptured: MutableList<GoStopCard> = mutableListOf(),
-
-    var goCount: Int = 0,          // how many times the current player has said "Go"
-    var multiplier: Int = 1        // score multiplier
+    var goCount: Int = 0,
+    var multiplier: Int = 1,
+    var pendingChoiceCard: GoStopCard? = null,
+    var pendingChoices: MutableList<GoStopCard>? = null
 
 )
 
-enum class Player { HUMAN, CPU }
 
+enum class Player { HUMAN, CPU }

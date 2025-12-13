@@ -5,27 +5,35 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.gostopmobileappprogramminglab.model.GoStopCard
 
 class CardAdapter(
-    private val cards: List<Int>,
-    private val onCardClick: (Int) -> Unit
+    private val cards: List<GoStopCard>,
+    private val selectable: Boolean = false,
+    private val onCardSelected: ((GoStopCard) -> Unit)? = null
 ) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
-    class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val cardImage: ImageView = view.findViewById(R.id.cardImage)
+    inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val cardImage: ImageView = itemView.findViewById(R.id.itemImage)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
-        val view = LayoutInflater
-            .from(parent.context)
-            .inflate(R.layout.item_card, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item, parent, false)
         return CardViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        holder.cardImage.setImageResource(cards[position])
-        holder.cardImage.setOnClickListener {
-            onCardClick(cards[position])
+        val card = cards[position]
+
+        holder.cardImage.setImageResource(card.drawableRes)
+
+        if (selectable) {
+            holder.itemView.setOnClickListener {
+                onCardSelected?.invoke(card)
+            }
+        } else {
+            holder.itemView.setOnClickListener(null)
         }
     }
 

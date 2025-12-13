@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application") version "8.13.1"
+    id("com.android.application") version "8.13.2"
     kotlin("android") version "2.0.21"
 }
 
@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation("io.coil-kt:coil:2.4.0")
+    implementation("io.coil-kt:coil:2.6.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("io.coil-kt:coil:2.6.0")
