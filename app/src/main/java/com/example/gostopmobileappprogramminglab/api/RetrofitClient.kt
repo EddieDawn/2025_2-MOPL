@@ -5,19 +5,25 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    // Random User API
+    // RandomUser API
     private val randomUserRetrofit = Retrofit.Builder()
         .baseUrl("https://randomuser.me/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val randomUserApi: ApiService = randomUserRetrofit.create(ApiService::class.java)
+    val randomUserApi: ApiService =
+        randomUserRetrofit.create(ApiService::class.java)
 
-    // Quotable API
-    private val quotableRetrofit = Retrofit.Builder()
-        .baseUrl("https://api.quotable.io/")
+
+    // ZenQuotes API
+    private val quoteRetrofit = Retrofit.Builder()
+        .baseUrl("https://zenquotes.io/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val quoteApi: ApiService = quotableRetrofit.create(ApiService::class.java)
+    val quoteApi: QuoteApiService =
+        quoteRetrofit.create(QuoteApiService::class.java)
 }
+
+
+

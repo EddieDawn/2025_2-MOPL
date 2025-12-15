@@ -1,95 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootView"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:padding="12dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="12dp"
+    android:background="@drawable/wood_background">
 
-    <!-- TURN INDICATOR -->
+    <!-- CPU speech bubble -->
+    <LinearLayout
+        android:id="@+id/cpuBubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:orientation="horizontal"
+        android:background="@drawable/bubble_cpu"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/cpuSpinner"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            style="?android:attr/progressBarStyleSmall" />
+
+        <TextView
+            android:id="@+id/cpuThinkingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thinking…"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- Turn Indicator -->
     <TextView
         android:id="@+id/turnIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your Turn"
-        android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:textSize="20sp"
-        android:layout_marginBottom="8dp"/>
+        android:textStyle="bold"
+        android:layout_marginTop="70dp"
+        android:layout_centerHorizontal="true" />
 
-    <!-- CAPTURE COUNT -->
+    <!-- Capture Count -->
     <TextView
         android:id="@+id/captureCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Captured: 0 / 0"
-        android:textSize="16sp"
-        android:layout_marginBottom="10dp"/>
-
-    <!-- SELECTED CARD PREVIEW -->
-    <ImageView
-        android:id="@+id/cardImage"
-        android:layout_width="190dp"
-        android:layout_height="190dp"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:layout_marginBottom="16dp"
-        android:contentDescription="@string/selected_card" />
-
-    <!-- OPPONENT NAME -->
-    <TextView
-        android:id="@+id/opponentName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Opponent: (loading...)"
-        android:textStyle="bold"
         android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_below="@id/turnIndicator"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="6dp"/>
 
-    <!-- OPPONENT IMAGE -->
-    <ImageView
-        android:id="@+id/opponentImage"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_marginTop="8dp"
-        android:scaleType="centerCrop" />
-
-    <!-- CPU THINKING TEXT -->
-    <TextView
-        android:id="@+id/cpuThinkingText"
+    <!-- Opponent profile with single gold frame -->
+    <LinearLayout
+        android:id="@+id/opponentRow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="CPU is thinking..."
-        android:textSize="16sp"
-        android:textColor="@android:color/holo_red_light"
-        android:layout_marginTop="10dp"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_below="@id/captureCount"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp">
 
-    <!-- CPU SPINNER -->
-    <ProgressBar
-        android:id="@+id/cpuSpinner"
-        style="?android:attr/progressBarStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:visibility="gone" />
+        <ImageView
+            android:id="@+id/opponentImage"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/avatar_gold_frame"
+            android:padding="4dp"
+            android:elevation="6dp"/>
 
-    <!-- FIELD RECYCLER -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fieldRecycler"
+        <TextView
+            android:id="@+id/opponentName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="6dp"
+            android:text="Opponent loading..." />
+    </LinearLayout>
+
+    <!-- Game board with gold corner decorations -->
+    <FrameLayout
+        android:id="@+id/fieldFrame"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:padding="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="10dp" />
+        android:layout_height="140dp"
+        android:layout_below="@id/opponentRow"
+        android:layout_marginTop="20dp"
+        android:padding="6dp"
+        android:elevation="12dp">
 
-    <!-- HAND RECYCLER -->
+        <ImageView
+            android:id="@+id/fieldBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/golden_border_thick"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true" />
+
+        <ImageView
+            android:id="@+id/decorTopLeft"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="start|top"
+            android:src="@drawable/gold_corner" />
+
+        <ImageView
+            android:id="@+id/decorTopRight"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="end|top"
+            android:rotationY="180"
+            android:src="@drawable/gold_corner" />
+
+        <ImageView
+            android:id="@+id/decorBottomRight"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="end|bottom"
+            android:rotation="180"
+            android:src="@drawable/gold_corner" />
+
+        <ImageView
+            android:id="@+id/decorBottomLeft"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="start|bottom"
+            android:rotationX="180"
+            android:src="@drawable/gold_corner" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fieldRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="6dp" />
+    </FrameLayout>
+
+    <!-- Last 5 card history -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/historyRecycler"
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:layout_below="@id/fieldFrame"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:padding="4dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"
+        android:overScrollMode="never" />
+
+    <!-- Selected card preview -->
+    <ImageView
+        android:id="@+id/cardImage"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_below="@id/historyRecycler"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/card_shadow"
+        android:scaleType="fitCenter"
+        android:elevation="8dp" />
+
+    <!-- Go stop bar -->
+    <LinearLayout
+        android:id="@+id/goStopBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="@drawable/go_stop_bar_blue"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/cardRecycler"
+        android:layout_marginBottom="20dp"
+        android:elevation="12dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/btnGo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GO"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#00E5FF"
+            android:padding="10dp"
+            android:layout_marginRight="24dp"/>
+
+        <TextView
+            android:id="@+id/btnStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STOP"
+            android:textStyle="bold"
+            android:textColor="#FF5252"
+            android:padding="10dp"/>
+    </LinearLayout>
+
+    <!-- Player hand -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/cardRecycler"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
-        android:padding="8dp"
-        android:orientation="horizontal" />
+        android:layout_height="180dp"
+        android:layout_alignParentBottom="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="20dp"
+        android:clipToPadding="false"
+        android:overScrollMode="always"
+        android:scrollbars="horizontal" />
+</RelativeLayout>
 
-</LinearLayout>

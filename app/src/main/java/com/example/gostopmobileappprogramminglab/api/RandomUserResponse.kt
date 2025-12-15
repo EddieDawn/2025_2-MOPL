@@ -5,26 +5,25 @@ data class RandomUserResponse(
 )
 
 data class UserResult(
-    val name: UserName,
-    val location: UserLocation,
-    val dob: UserDOB,
-    val picture: UserPicture
+    val name: Name,
+    val dob: Dob,
+    val location: Location,
+    val picture: Picture
 )
 
-data class UserName(
-    val title: String,
+data class Name(
     val first: String,
     val last: String
 )
 
-data class UserLocation(
-    val country: String
-)
-
-data class UserDOB(
+data class Dob(
     val age: Int
 )
 
-data class UserPicture(
+data class Location(
+    val country: String
+)
+
+data class Picture(
     val large: String
 )

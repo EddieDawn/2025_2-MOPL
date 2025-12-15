@@ -4,29 +4,21 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.view.animation.AnimationUtils
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
-import android.graphics.Color
-
-import com.example.gostopmobileappprogramminglab.api.QuoteResponse
-import com.example.gostopmobileappprogramminglab.api.RandomUserResponse
 import com.example.gostopmobileappprogramminglab.api.RetrofitClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import com.example.gostopmobileappprogramminglab.logic.GameEngine
-import com.example.gostopmobileappprogramminglab.model.GameState
-import com.example.gostopmobileappprogramminglab.model.GoStopCard
-import com.example.gostopmobileappprogramminglab.model.Player
-import com.example.gostopmobileappprogramminglab.ai.SimpleOpponent
+import com.example.gostopmobileappprogramminglab.model.*
 
 class GoStopActivity : AppCompatActivity() {
 
@@ -35,14 +27,29 @@ class GoStopActivity : AppCompatActivity() {
     private lateinit var fieldAdapter: CardAdapter
     private lateinit var handAdapter: CardAdapter
 
+
+    // Card history (last 5 played)
+    private val historyCards = mutableListOf<GoStopCard>()
+    private lateinit var historyRecycler: RecyclerView
+    private lateinit var historyAdapter: HistoryAdapter
+
+
     private lateinit var cardImage: ImageView
     private lateinit var captureCount: TextView
     private lateinit var turnIndicator: TextView
+
     private lateinit var opponentName: TextView
     private lateinit var opponentImage: ImageView
+
+    private lateinit var cpuBubble: View
     private lateinit var cpuThinkingText: TextView
     private lateinit var cpuSpinner: ProgressBar
+
     private lateinit var fieldRecycler: RecyclerView
+    private lateinit var goStopBar: View
+    private lateinit var btnGo: TextView
+    private lateinit var btnStop: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,60 +58,92 @@ class GoStopActivity : AppCompatActivity() {
         cardImage = findViewById(R.id.cardImage)
         captureCount = findViewById(R.id.captureCount)
         turnIndicator = findViewById(R.id.turnIndicator)
+
         opponentName = findViewById(R.id.opponentName)
         opponentImage = findViewById(R.id.opponentImage)
+
+        cpuBubble = findViewById(R.id.cpuBubble)
         cpuThinkingText = findViewById(R.id.cpuThinkingText)
         cpuSpinner = findViewById(R.id.cpuSpinner)
+        cpuBubble.visibility = View.GONE
+
         fieldRecycler = findViewById(R.id.fieldRecycler)
 
-        cpuThinkingText.visibility = View.GONE
-        cpuSpinner.visibility = View.GONE
+        goStopBar = findViewById(R.id.goStopBar)
+        btnGo = findViewById(R.id.btnGo)
+        btnStop = findViewById(R.id.btnStop)
+        goStopBar.visibility = View.GONE
+
+        btnGo.setOnClickListener { chooseGo() }
+        btnStop.setOnClickListener { chooseStop() }
 
         state = GameEngine.startNewGame()
 
         setupOpponent()
         setupFieldRecycler()
         setupHandRecycler()
+        setupHistoryRecycler()
         updateUI()
     }
 
-    // Load random user as cpu
-
-    private fun setupOpponent() {
-        lifecycleScope.launch {
-            try {
-                val response: RandomUserResponse = RetrofitClient.randomUserApi.getRandomUser()
-                val user = response.results.first()
-
-                opponentName.text =
-                    "${user.name.first} ${user.name.last} (${user.dob.age}, ${user.location.country})"
-                opponentImage.load(user.picture.large)
-
-            } catch (e: Exception) {
-                opponentName.text = "Opponent: CPU Bot"
-            }
-        }
-    }
-
+    // Field
     private fun setupFieldRecycler() {
         fieldRecycler.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         fieldAdapter = CardAdapter(state.field, selectable = false)
+        fieldAdapter.fieldCards = state.field
         fieldRecycler.adapter = fieldAdapter
     }
 
+    // Hand
     private fun setupHandRecycler() {
         val recycler = findViewById<RecyclerView>(R.id.cardRecycler)
         recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        handAdapter = CardAdapter(state.playerHand, selectable = true) { card ->
-            onPlayerCardSelected(card)
-        }
+        handAdapter = CardAdapter(
+            cards = state.playerHand,
+            selectable = true,
+            onCardSelected = { card -> onPlayerCardSelected(card) }
+        )
+
+        handAdapter.fieldCards = state.field
         recycler.adapter = handAdapter
     }
 
-    // User turn
+    // HISTORY (last 5 played)
+
+    private fun setupHistoryRecycler() {
+        historyRecycler = findViewById(R.id.historyRecycler)
+
+        historyRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        historyAdapter = HistoryAdapter(historyCards)
+        historyRecycler.adapter = historyAdapter
+    }
+
+    // UI update
+    private fun updateUI() {
+        handAdapter.fieldCards = state.field
+        fieldAdapter.fieldCards = state.field
+
+        handAdapter.notifyDataSetChanged()
+        fieldAdapter.notifyDataSetChanged()
+
+        captureCount.text =
+            "You: ${state.playerCaptured.size}   CPU: ${state.cpuCaptured.size}"
+
+        turnIndicator.text =
+            if (state.currentTurn == Player.HUMAN) "Your Turn"
+            else "CPU Turn"
+
+        fieldRecycler.startAnimation(
+            AnimationUtils.loadAnimation(this, R.anim.slide_in_capture)
+        )
+    }
+
+    // PLAYER MOVE
     private fun onPlayerCardSelected(card: GoStopCard) {
         if (state.currentTurn != Player.HUMAN) return
 
@@ -113,6 +152,9 @@ class GoStopActivity : AppCompatActivity() {
         state.playerHand.remove(card)
         GameEngine.playCard(state, card)
 
+        // Add to history
+        historyAdapter.addCard(card)
+
         updateUI()
 
         if (GameEngine.isRoundOver(state)) {
@@ -120,29 +162,33 @@ class GoStopActivity : AppCompatActivity() {
             return
         }
 
-        // CPU turn start
-        GameEngine.switchTurn(state)
+        if (GameEngine.shouldOfferGoStop(state)) {
+            goStopBar.visibility = View.VISIBLE
+            return
+        }
+
+        state.currentTurn = Player.CPU
         showCpuThinkingUI(true)
 
         Handler(Looper.getMainLooper()).postDelayed({
             launchCpuMove()
-        }, 800)
+        }, 900)
     }
 
-    // CPU Turn
+    // CPU move
     private fun launchCpuMove() {
         lifecycleScope.launch(Dispatchers.Default) {
 
-            val aiCard = SimpleOpponent.chooseMove(state)
+            val card = GameEngine.cpuPlay(state)
 
-            if (aiCard != null) {
-                state.opponentHand.remove(aiCard)
-                GameEngine.playCard(state, aiCard)
-            }
-
-            // Switches back to ui thread
             withContext(Dispatchers.Main) {
                 showCpuThinkingUI(false)
+
+                if (card != null) {
+                    cardImage.setImageResource(card.drawableRes)
+                    historyAdapter.addCard(card)
+                }
+
                 updateUI()
 
                 if (GameEngine.isRoundOver(state)) {
@@ -150,77 +196,82 @@ class GoStopActivity : AppCompatActivity() {
                     return@withContext
                 }
 
-                GameEngine.switchTurn(state)
+                state.currentTurn = Player.HUMAN
                 turnIndicator.text = "Your Turn"
-                turnIndicator.setTextColor(getColor(R.color.blue))
             }
         }
     }
-    // CPU thinking animation
 
     private fun showCpuThinkingUI(show: Boolean) {
         if (show) {
-            turnIndicator.text = "CPU Thinking…"
-            turnIndicator.setTextColor(getColor(R.color.red))
-            cpuSpinner.visibility = View.VISIBLE
-            cpuThinkingText.visibility = View.VISIBLE
+            cpuBubble.visibility = View.VISIBLE
+            val pulse = AnimationUtils.loadAnimation(this, R.anim.cpu_pulse)
+            opponentImage.startAnimation(pulse)
         } else {
-            cpuSpinner.visibility = View.GONE
-            cpuThinkingText.visibility = View.GONE
+            opponentImage.clearAnimation()
+            cpuBubble.visibility = View.GONE
         }
     }
 
-    // -------------------------
-    // UPDATE UI
-    // -------------------------
-    private fun updateUI() {
-        handAdapter.notifyDataSetChanged()
-        fieldAdapter.notifyDataSetChanged()
+    private fun chooseGo() {
+        state.multiplier += 1
+        goStopBar.visibility = View.GONE
 
-        val pCap = state.playerCaptured.size
-        val cCap = state.cpuCaptured.size
-        captureCount.text = "Captured: $pCap / $cCap"
+        state.currentTurn = Player.CPU
+        showCpuThinkingUI(true)
 
-        if (state.currentTurn == Player.HUMAN) {
-            turnIndicator.text = "Your Turn"
-            turnIndicator.setTextColor(getColor(R.color.blue))
-        } else {
-            turnIndicator.text = "CPU Turn"
-            turnIndicator.setTextColor(getColor(R.color.red))
-        }
+        Handler(Looper.getMainLooper()).postDelayed({
+            launchCpuMove()
+        }, 900)
     }
 
+    private fun chooseStop() {
+        val (p, c) = GameEngine.calculateFinalScore(state)
 
-    // round end
+        AlertDialog.Builder(this)
+            .setTitle("Final Score")
+            .setMessage("You: $p × ${state.multiplier}\nCPU: $c")
+            .setPositiveButton("OK") { _, _ -> finish() }
+            .show()
+    }
 
     private fun endRound() {
         val (playerScore, cpuScore) = GameEngine.calculateFinalScore(state)
 
         lifecycleScope.launch {
-            val quoteText = fetchQuote()
+            val quote = fetchQuote()
 
             AlertDialog.Builder(this@GoStopActivity)
                 .setTitle("Round Over")
-                .setMessage(
-                    """
-                    You: $playerScore  
-                    CPU: $cpuScore
-
-                    $quoteText
-                    """.trimIndent()
-                )
+                .setMessage("You: $playerScore\nCPU: $cpuScore\n\n$quote")
                 .setPositiveButton("OK") { _, _ -> finish() }
                 .show()
         }
     }
 
+    private fun setupOpponent() {
+        lifecycleScope.launch {
+            try {
+                val resp = RetrofitClient.randomUserApi.getRandomUser()
+                val user = resp.results.first()
+
+                opponentName.text =
+                    "${user.name.first} ${user.name.last} (${user.dob.age}, ${user.location.country})"
+
+                opponentImage.load(user.picture.large)
+            } catch (_: Exception) {
+                opponentName.text = "CPU Opponent"
+            }
+        }
+    }
+
     private suspend fun fetchQuote(): String {
         return try {
-            val q: QuoteResponse = RetrofitClient.quoteApi.getRandomQuote()
-            "\"${q.content}\" - ${q.author}"
+            val list = RetrofitClient.quoteApi.getRandomQuote()
+            val q = list.first()
+            "\"${q.q}\" — ${q.a}"
         } catch (e: Exception) {
-            "(Quote unavailable)"
+            "(Unable to load quote)"
         }
     }
 }
-
