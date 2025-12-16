@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".Game3RulesActivity">
+
+    <TextView
+        android:id="@+id/rulesTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mini Go-Stop Rules"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/rulesTitle"
+        android:layout_above="@+id/backButtonFromRules">
+
+        <TextView
+            android:id="@+id/rulesText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="
+- **Objective:**
+Get a higher score than the CPU.
+
+- **Setup:**
+Each player starts with 10 cards, and 8 cards are placed on the field.
+
+- **How to Play:**
+1. Play a card from your hand. If it matches the month of a card on the field, you capture both.
+2. A card is then automatically flipped from the deck. If it matches a card on the field, you capture those as well.
+
+- **Scoring (Simplified):**
+  •  Brights: Score points starting from 3 cards.
+  •  Animals: Score points starting from 5 cards.
+  •  Ribbons: Score points starting from 5 cards.
+  •  Junk: Score points starting from 10 cards.
+  * Special combinations (Yaks) like Godori, Hongdan, etc., are not included in this version.
+
+- **Go/Stop:**
+  •  When you capture 7 or more cards, you can choose to 'Go' (continue the round) or 'Stop' (end the round)."
+            android:lineSpacingExtra="4dp"
+            android:textSize="16sp"/>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/backButtonFromRules"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="16dp"/>
+
+</RelativeLayout>
