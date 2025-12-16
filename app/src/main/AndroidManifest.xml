@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -28,6 +31,12 @@
             android:exported="false" />
         <activity
             android:name=".Game3Activity"
+            android:exported="false" />
+        <activity
+            android:name=".GoStopActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Game3RulesActivity"
             android:exported="false" />
         <activity
             android:name=".Game1RulesActivity"
