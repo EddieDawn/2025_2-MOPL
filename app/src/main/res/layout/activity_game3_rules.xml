@@ -22,32 +22,90 @@
         android:layout_below="@id/rulesTitle"
         android:layout_above="@+id/backButtonFromRules">
 
-        <TextView
-            android:id="@+id/rulesText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="
-- **Objective:**
-Get a higher score than the CPU.
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
-- **Setup:**
-Each player starts with 10 cards, and 8 cards are placed on the field.
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Objective"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-- **How to Play:**
-1. Play a card from your hand. If it matches the month of a card on the field, you capture both.
-2. A card is then automatically flipped from the deck. If it matches a card on the field, you capture those as well.
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Get a higher score than the CPU."
+                android:textSize="16sp" />
 
-- **Scoring (Simplified):**
-  •  Brights: Score points starting from 3 cards.
-  •  Animals: Score points starting from 5 cards.
-  •  Ribbons: Score points starting from 5 cards.
-  •  Junk: Score points starting from 10 cards.
-  * Special combinations (Yaks) like Godori, Hongdan, etc., are not included in this version.
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Setup"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-- **Go/Stop:**
-  •  When you capture 7 or more cards, you can choose to 'Go' (continue the round) or 'Stop' (end the round)."
-            android:lineSpacingExtra="4dp"
-            android:textSize="16sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Each player starts with a hand of 7 cards, and 1 card is placed on the field to start."
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="How to Play"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:lineSpacingExtra="4dp"
+                android:text="1. Starts with your turn, play a card from your hand.\n2. If it matches the month of a card on the field, you capture both.\n3. If it does not match, it stays on the field.\n4. Then, flip one card from the deck and repeat the same rule."
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Scoring (Simplified)"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:lineSpacingExtra="4dp"
+                android:text="• Each captured card = 1 point\n• When you capture 7 or more cards, you can choose to &quot;Go&quot; (continuing the round increases your multiplier) or &quot;Stop&quot; (end the round and score).\n• The go/stop multiplier increases your final total each time you chose Go.\n• *Special combinations (Yaks) like Godori, Hongdan, etc., are not included in this version."
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="End of Round"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="When all cards are played, the player with the higher total score (after multipliers) wins."
+                android:textSize="16sp" />
+
+        </LinearLayout>
     </ScrollView>
 
     <Button
